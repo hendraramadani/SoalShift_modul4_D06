@@ -11,6 +11,222 @@ Misalkan ada file bernama “halo” di dalam folder “INI_FOLDER”, dan key y
 
 Perhatian: Karakter ‘/’ adalah karakter ilegal dalam penamaan file atau folder dalam *NIX, maka dari itu dapat diabaikan
 
+### Jawab
+1. membuat fungsi enkripsi
+
+  ```
+  void encrypt(const char *name, int indent)
+  {
+      char tes[94] = "qE1~ YMUR2\"``hNIdPzi%^t@(Ao:=CQ,nx4S[7mHFye#aT6+v)DfKL$r?bkOGB>}!9_wV']jcp5JZ&Xl|\\8s;g<{3.u*W-0";
+      DIR *dir;
+      char buffer[1000],buffer2[1000],buffer3[1000],hasil[1000],ch,ce;
+      struct dirent *entry;
+
+      if (!(dir = opendir(name)))
+          return;
+
+      while ((entry = readdir(dir)) != NULL) {
+              memset(hasil,0,1000);
+              memset(buffer,0,1000);
+              memset(buffer2,0,1000);
+              memset(buffer3,0,1000);
+          if (entry->d_type == DT_DIR) {
+              char path[1024];
+              if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                  continue;
+              snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+              strcpy(buffer, entry->d_name);
+              //printf("%s\n", buffer);
+
+              strcat(buffer2,name);
+              strcat(buffer2,"/");
+
+
+              for(int i=0;i<strlen(buffer);i++){
+        ch = buffer[i];
+                  if(ch == '/'){
+                      ce = '/';
+
+                      hasil[i] = ce;
+                  }
+                  else{
+                      for(int j=0;j<strlen(tes);j++){
+                          if(ch == tes[j]){
+                              int a = (j+17)%94;
+                              ce = tes[a];
+                          }
+                      hasil[i] = ce;
+                          }
+                      }
+              }
+              //strcpy(hasil,"");
+              strcat(buffer2,hasil);
+              rename(path,buffer2);
+              strcpy(path,buffer2);
+              //printf("%*s[%s]\n", indent, "", entry->d_name);
+              // memset(hasil,0,1000);
+              // memset(buffer,0,1000);
+              // memset(buffer2,0,1000);
+              // memset(buffer3,0,1000);
+              encrypt(path, indent + 2);
+          } else {
+              strcpy(buffer, entry->d_name);
+              //printf("%s\n", buffer);
+
+              strcat(buffer2,name);
+              strcat(buffer2,"/");
+              strcat(buffer3,buffer2);
+              strcat(buffer2,entry->d_name);
+
+
+
+
+              for(int i=0;i<strlen(buffer);i++){
+        ch = buffer[i];
+                  if(ch == '/'){
+                      ce = '/';
+
+                      hasil[i] = ce;
+                  }
+                  else{
+                      for(int j=0;j<strlen(tes);j++){
+                          if(ch == tes[j]){
+                              int a = (j+17)%94;
+                              ce = tes[a];
+                          }
+                      hasil[i] = ce;
+                          }
+                      }
+              }
+              strcat(buffer3,hasil);
+             // printf("%s\n", buffer2);
+             // printf("%s\n", buffer3);
+
+
+              rename(buffer2,buffer3);
+
+          }
+
+      }
+
+      //memset(hasil,0,1000);
+      closedir(dir);
+  }
+
+  ```  
+
+- sebelum dimount folder target yang akan dimount akan dienkripsi dan nantinya ketika dimount folder target akan didekripsi
+
+2. Kemudian membuat fungsi dekripsi
+
+  ```
+  void decrypt(const char *name, int indent)
+  {
+      char tes[94] = "qE1~ YMUR2\"`hNIdlzi%^t@(Ao:=CQ,nx4S[7mHFye#aT6+v)DfKL$r?bkOGB>}!9_wV']jcp5JZ&Xl|\\8s;g<{3.u*W-0";
+      //printf("%s",tes);
+      DIR *dir;
+      char buffer[1000],buffer2[1000],buffer3[1000],hasil[1000],ch,ce;
+      struct dirent *entry;
+
+      if (!(dir = opendir(name)))
+          return;
+
+      while ((entry = readdir(dir)) != NULL) {
+              memset(hasil,0,1000);
+              memset(buffer,0,1000);
+              memset(buffer2,0,1000);
+              memset(buffer3,0,1000);
+
+          if (entry->d_type == DT_DIR) {
+              char path[1024];
+              if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                  continue;
+              snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+              strcpy(buffer, entry->d_name);
+              //printf("%s\n", buffer);
+
+              strcat(buffer2,name);
+              strcat(buffer2,"/");
+
+
+              for(int i=0;i<strlen(buffer);i++){
+        ch = buffer[i];
+                  if(ch == '/'){
+                      ce = '/';
+
+                      hasil[i] = ce;
+                  }
+                  else{
+                      for(int j=0;j<strlen(tes);j++){
+                          if(ch == tes[j]){
+                              int a = abs((j-17))%94;
+                              printf("%d ",a);
+                              ce = tes[a];
+                          }
+                      hasil[i] = ce;
+                          }
+                      }
+              }
+              //strcpy(hasil,"");
+              strcat(buffer2,hasil);
+              rename(path,buffer2);
+              strcpy(path,buffer2);
+              printf("%s",path);
+              //printf("%*s[%s]\n", indent, "", entry->d_name);
+              // memset(hasil,0,1000);
+              // memset(buffer,0,1000);
+              // memset(buffer2,0,1000);
+              // memset(buffer3,0,1000);
+              decrypt(path, indent + 2);
+
+
+          } else {
+              strcpy(buffer, entry->d_name);
+              //printf("sebelum decrypt: %s\n", buffer);
+
+              strcat(buffer2,name);
+              strcat(buffer2,"/");
+              strcat(buffer3,buffer2);
+              strcat(buffer2,entry->d_name);
+
+
+
+
+              for(int i=0;i<strlen(buffer);i++){
+        ch = buffer[i];
+                  if(ch == '/'){
+                      ce = '/';
+
+                      hasil[i] = ce;
+                  }
+                  else{
+                      for(int j=0;j<strlen(tes);j++){
+                          if(ch == tes[j]){
+                              int a = abs((j-17))%94;
+                              printf("%d ",a);
+                              ce = tes[a];
+                          }
+                      hasil[i] = ce;
+                          }
+                      }
+              }
+              strcat(buffer3,hasil);
+              //printf("setelah dekrip: %s\n", hasil);
+             printf("%s\n", buffer3);
+
+
+           rename(buffer2,buffer3);
+
+          }
+
+      }
+
+      //memset(hasil,0,1000);
+      closedir(dir);
+  }
+  ```
+  - namun untuk fungsi deskripnya masih belum berhasil
+  
 ## Soal 2
 ### Semua file video yang tersimpan secara terpecah-pecah (splitted) harus secara otomatis tergabung (joined) dan diletakkan dalam folder “Videos” Urutan operasi dari kebutuhan ini adalah:
 
